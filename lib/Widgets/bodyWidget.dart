@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../article.dart';
 
@@ -55,10 +54,10 @@ class bodyWidget extends StatelessWidget {
   }
   Future<void> _launchUrl(Uri uri) async {
     String url = uri.toString();
-    if (await canLaunch(url)) {
+   /* if (await canLaunch(url)) {
       await launch(url);
     } else {
       throw 'Could not launch $url';
-    }
+    }*/
   }
 }

@@ -1,8 +1,10 @@
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:news/Widgets/cardWidget.dart';
 import 'package:news/article.dart';
 import 'details.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 
 class HomePage extends StatefulWidget {
@@ -13,9 +15,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final apiKey = dotenv.env['API_KEY'];
   List<Article> articlesSearch = [];
   final dio = Dio();
-  final api = "dc6b4b08b41a4e2195ed1c2b7fadd648";
 
   var search;
 
@@ -82,44 +84,7 @@ class _HomePageState extends State<HomePage> {
                         child: Hero(
                           tag: article?.img ??
                               "https://raw.githubusercontent.com/koehlersimon/fallback/master/Resources/Public/Images/placeholder.jpg",
-                          child: Card(
-                            elevation: 3.0,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Container(
-                                  width: 100.0,
-                                  height: 100.0,
-                                  decoration: BoxDecoration(
-                                    image: DecorationImage(
-                                      image: NetworkImage(article?.img ??
-                                          "https://raw.githubusercontent.com/koehlersimon/fallback/master/Resources/Public/Images/placeholder.jpg"),
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    article.title ?? "No Title",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 15.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    article.description ?? "No Description",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 10.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                          child: CardWidget(img:article.img,title: article.title,description: article.description),
                         ),
                       ),
                     );
@@ -136,7 +101,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> fetchData() async {
     articlesSearch = [];
-    var url = "https://newsapi.org/v2/everything?q=$search&from=2023-10-08&to=2023-10-08&sortBy=popularity&apiKey=$api";
+    var url = "https://newsapi.org/v2/everything?q=$search&from=2023-10-08&to=2023-10-08&sortBy=popularity&apiKey=$apiKey";
     var response = await dio.get(url);
     var results = response.data["articles"];
 
