@@ -5,11 +5,11 @@ import 'homePage.dart';
 Future<void> main() async {
   await dotenv.load(fileName: "assets/.env");
   runApp(
-    MaterialApp(
-      title: "Poke App",
-      home:HomePage(),
-      debugShowCheckedModeBanner: false,
-    )
-  );
+     MaterialApp(
+        title: "Poke App",
+        home:HomePage(),
+        debugShowCheckedModeBanner: false,
+      ),
+    );
 }
 

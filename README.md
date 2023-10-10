@@ -1,16 +1,30 @@
-# news
+<p align="center">
+  <a href="https://github.com/carmelBar24/news">
+    <img src="assets/images/logo.png" alt="Logo"> 
+  </a>
+</p>
 
-A new Flutter project.
+<p align ="center"> 
+<i>A News App using <a href="https://flutter.dev/">Flutter 💕</a></i>
+<br><br>
 
-## Getting Started
+## About the App 📰
 
-This project is a starting point for a Flutter application.
+- News is a App to view the popular breaking news 🤤!
 
-A few resources to get you started if this is your first Flutter project:
+- You can filter the search between dates 😍.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- You can search by keywords 🤗.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Screens 😍
+<p align="center">
+<img src="assets/images/home page.png" height="400"/><img src="assets/images/details.png" height="400" hspace="20"/><br><br><img src="assets/images/empty.png" height="400" />
+<img src="assets/images/date picker.png" height="400"/>
+</p>
+
+## In Action 👀
+<p align="center">
+  <a href="https://github.com/carmelBar24/news">
+    <img src="assets/images/video.gif" alt="Logo" height="540"> 
+  </a>
+</p>

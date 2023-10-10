@@ -1,10 +1,13 @@
 
-import 'package:dio/dio.dart';
+
+import 'package:lottie/lottie.dart';
 import 'package:flutter/material.dart';
-import 'package:news/Widgets/cardWidget.dart';
+import 'package:news/Widgets/gridElementWidget.dart';
 import 'package:news/article.dart';
-import 'details.dart';
+import 'NewsBloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+
 
 
 class HomePage extends StatefulWidget {
@@ -15,15 +18,81 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
   final apiKey = dotenv.env['API_KEY'];
-  List<Article> articlesSearch = [];
-  final dio = Dio();
-
+  final NewsBloc newsBloc = NewsBloc();
+  DateTime startDate=DateTime.now();
+  DateTime endDate=DateTime.now();
   var search;
+  var error="";
+  bool loading=false;
 
+  @override
+  void dispose() {
+    newsBloc.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    Future<void> _showDatePicker(BuildContext context,date) async {
+      final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime(2023),
+        lastDate: DateTime.now(),
+      );
+      if (picked != null && picked != date) {
+        setState(() {
+          if(date=="start")
+          {
+            startDate = picked;
+          }
+          else{
+            endDate=picked;
+          }
+        });
+      }
+    }
+
+    @visibleForTesting
+    searchHandler(){
+      try {
+        setState(() {
+          error="";
+        });
+        if (search==null) {
+          throw ('Search cannot be empty');
+        }
+
+        if (search.contains(RegExp(r'\d'))) {
+          throw(
+              'Search cannot contain numbers');
+        }
+
+        if (startDate.isAfter(endDate)) {
+          throw (
+              'Start date must be before end date');
+        }
+        setState(() {
+          loading = true;
+        });
+
+        newsBloc.fetchArticles(
+            search, apiKey!, startDate, endDate).then((
+            _) {
+          setState(() {
+            loading = false;
+          });
+        });
+      }
+      catch(e)
+      {
+        setState(() {
+          error=e.toString();
+        });
+      }
+    }
     return Scaffold(
         appBar: AppBar(
           title: Text("News App"),
@@ -52,70 +121,72 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       IconButton(
-                          onPressed: () => fetchData(),
-                          // Add this onPressed callback
-                          icon: Icon(Icons.search)
-                      )
+                          onPressed:searchHandler,
+                          icon: Icon(Icons.search))
                     ],
                   ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          _showDatePicker(context,"start");
+                        },
+                        child: Text("Pick Start Date",style: TextStyle(color: Colors.black)),
+                      ),
+                      Center(
+                        child: TextButton(
+                          onPressed: () {
+                            _showDatePicker(context,"end");
+                          },
+                          child: Text("Pick end Date",style: TextStyle(color: Colors.black)),
+                        ),
+                      ),
+                    ],
+                  )
                 ],
               ),
             ),
-            articlesSearch.isNotEmpty ? Expanded(
-              child: Scrollbar(
-                thumbVisibility: true,
-                thickness: 10,
-                interactive: true,
-                trackVisibility: true,
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  children: articlesSearch.map((article) {
-                    return Padding(
-                      padding: const EdgeInsets.all(2.0),
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Details(article: article),
-                            ),
-                          );
-                        },
-                        child: Hero(
-                          tag: article?.img ??
-                              "https://raw.githubusercontent.com/koehlersimon/fallback/master/Resources/Public/Images/placeholder.jpg",
-                          child: CardWidget(img:article.img,title: article.title,description: article.description),
-                        ),
+            StreamBuilder<List<Article>>(
+              stream: newsBloc.articlesStream,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  List<Article> articlesSearch = snapshot.data!;
+                  if(articlesSearch.isNotEmpty){
+                  return Expanded(
+                    child: Scrollbar(
+                      thumbVisibility: true,
+                      thickness: 10,
+                      interactive: true,
+                      trackVisibility: true,
+                      child: GridView.count(
+                        crossAxisCount: 2,
+                        children: articlesSearch.map((article) {
+                          return GridElementWidget(article: article);
+                        }).toList(),
                       ),
+                    ),
+                  );}
+                  else{
+                    return Column(
+                      children: [
+                      Text("Nothing Here..",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
+                      Container(height: MediaQuery.of(context).size.height*0.5,child: Lottie.asset('assets/empty.json'))
+                      ],
                     );
-                  }).toList(),
-                ),
-              ),
-            ) : Center(child: Container()),
+                  }
+                } else if (!loading) {
+                  return Center(child: Container(
+                    child: Text(error),
+                  ));
+                } else {
+                  return Center(child: CircularProgressIndicator(color: Colors.red,));
+                }
+              },
+            ),
           ],
         )
-      /*: Center(child: CircularProgressIndicator()),*/
-    );
+        );
   }
-
-
-  Future<void> fetchData() async {
-    articlesSearch = [];
-    var url = "https://newsapi.org/v2/everything?q=$search&from=2023-10-08&to=2023-10-08&sortBy=popularity&apiKey=$apiKey";
-    var response = await dio.get(url);
-    var results = response.data["articles"];
-
-    for (var article in results) {
-      Article p = Article(description: article['description'],
-          content: article['content'],
-          link: article["url"],
-          id: article['source']['id'],
-          title: article['source']['name'],
-          img: article['urlToImage'],
-          author: article['author']);
-      articlesSearch.add(p);
-    }
-    setState(() {});
-  }
-
 }
+

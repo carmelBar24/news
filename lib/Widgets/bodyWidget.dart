@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:url_launcher/url_launcher.dart';
 import '../article.dart';
 
 class bodyWidget extends StatelessWidget {
@@ -28,8 +28,11 @@ class bodyWidget extends StatelessWidget {
                 fontWeight: FontWeight.bold
                 ),
                 ),
-                Text(article.content),
-                TextButton(onPressed: () => _launchUrl(Uri.parse(article.link)), child:Text("press"))
+                Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: Text(article.content,style: TextStyle(fontSize: 15)),
+                ),
+                TextButton(onPressed: () => _launchUrl(article.link), child:Text("Article Link",style: TextStyle(color: Colors.white)),style: ButtonStyle(backgroundColor: MaterialStatePropertyAll(Colors.redAccent.shade200), elevation: MaterialStatePropertyAll(3)),)
 
               ],
             ),
@@ -51,13 +54,18 @@ class bodyWidget extends StatelessWidget {
         )
       ],
     );
-  }
-  Future<void> _launchUrl(Uri uri) async {
-    String url = uri.toString();
-   /* if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
-    }*/
+    }
+}
+
+_launchUrl(link) async {
+  if (!await canLaunch(link)){
+    await launch(
+      link,
+      forceSafariVC: false,
+      forceWebView: false,
+      headers: <String, String>{'my_header_key': 'my_header_value'},
+    );
+  } else {
+    throw 'Could not launch $link';
   }
 }
